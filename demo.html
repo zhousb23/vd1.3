@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人工作台 - Demo</title>
+<style>
+  /* ===== Reset & Base ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1117;
+    --panel-bg: #161822;
+    --border: #252836;
+    --text: #e1e4eb;
+    --text-secondary: #8b8fa8;
+    --accent: #5b6dff;
+    --accent-hover: #7684ff;
+    --success: #3ecf8e;
+    --warning: #f5a623;
+    --danger: #f5475d;
+    --radius: 8px;
+    --radius-sm: 4px;
+  }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ===== Top Toolbar ===== */
+  .toolbar {
+    height: 44px;
+    background: var(--panel-bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 8px;
+    -webkit-app-region: drag;
+  }
+  .toolbar .app-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-right: 16px;
+    color: var(--text);
+  }
+  .toolbar .sep {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+    margin: 0 4px;
+  }
+  .toolbar button {
+    -webkit-app-region: no-drag;
+  }
+
+  /* ===== Buttons ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    background: var(--panel-bg);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .btn:hover { border-color: var(--accent); color: #fff; }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-success { background: var(--success); border-color: var(--success); color: #000; }
+  .btn-danger { border-color: var(--danger); color: var(--danger); }
+  .btn-danger:hover { background: var(--danger); color: #fff; }
+  .btn-sm { padding: 4px 8px; font-size: 12px; }
+  .btn-icon { width: 32px; height: 32px; padding: 0; justify-content: center; font-size: 16px; }
+
+  /* ===== Layout ===== */
+  .main-layout {
+    display: flex;
+    height: calc(100vh - 44px);
+  }
+
+  /* ===== Left Panel ===== */
+  .left-panel {
+    width: 240px;
+    min-width: 240px;
+    background: var(--panel-bg);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+  .left-panel .panel-header {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .left-panel .search-box {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+  }
+  .left-panel .search-box:focus { border-color: var(--accent); }
+  .left-panel .search-box::placeholder { color: var(--text-secondary); }
+
+  .project-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px;
+  }
+  .project-item {
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    transition: background 0.15s;
+    margin-bottom: 2px;
+  }
+  .project-item:hover { background: rgba(255,255,255,0.04); }
+  .project-item.active { background: rgba(91,109,255,0.15); border: 1px solid rgba(91,109,255,0.3); }
+  .project-item .name { font-size: 13px; font-weight: 500; }
+  .project-item .meta { font-size: 11px; color: var(--text-secondary); display: flex; gap: 8px; }
+  .project-item .status-dot {
+    width: 6px; height: 6px; border-radius: 50%; display: inline-block;
+    background: var(--text-secondary);
+  }
+  .project-item .status-dot.done { background: var(--success); }
+  .project-item .status-dot.active { background: var(--accent); }
+
+  .left-panel .panel-footer { padding: 8px; border-top: 1px solid var(--border); }
+
+  /* ===== Middle Panel ===== */
+  .middle-panel {
+    flex: 1;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .middle-panel .tab-bar {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel-bg);
+  }
+  .middle-panel .tab {
+    padding: 10px 20px;
+    font-size: 13px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+  }
+  .middle-panel .tab:hover { color: var(--text); }
+  .middle-panel .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .middle-panel .content-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  /* ===== Editor Content ===== */
+  .editor-section { margin-bottom: 24px; }
+  .editor-section .section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .editor-section .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .editor-textarea {
+    width: 100%;
+    min-height: 200px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--panel-bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.8;
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+  }
+  .editor-textarea:focus { border-color: var(--accent); }
+  .editor-textarea::placeholder { color: var(--text-secondary); }
+
+  /* Character cards */
+  .character-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .character-card {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    min-width: 180px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .character-card:hover { border-color: var(--accent); }
+  .character-card .char-name { font-weight: 600; font-size: 14px; }
+  .character-card .char-info { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+  .character-card .char-tags { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+  .tag {
+    font-size: 11px; padding: 2px 6px;
+    background: rgba(91,109,255,0.2); color: var(--accent);
+    border-radius: 3px;
+  }
+  .character-card.add-card {
+    border-style: dashed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    min-width: 100px;
+  }
+  .character-card.add-card:hover { color: var(--accent); }
+
+  /* Script view */
+  .script-scene {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .script-scene .scene-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .script-scene .scene-num {
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+  .script-scene .scene-location { font-size: 13px; color: var(--text-secondary); }
+  .script-scene .scene-desc { font-size: 13px; line-height: 1.6; margin-bottom: 8px; }
+  .script-scene .dialogue-item {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .script-scene .dialogue-char { font-weight: 600; color: var(--accent); font-size: 13px; }
+  .script-scene .dialogue-text { font-size: 13px; margin-top: 2px; }
+
+  /* Storyboard view */
+  .storyboard-grid { display: flex; flex-direction: column; gap: 8px; }
+  .storyboard-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    transition: border-color 0.15s;
+  }
+  .storyboard-row:hover { border-color: var(--accent); }
+  .storyboard-row .sb-num {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg); border-radius: 50%;
+    font-size: 13px; font-weight: 600; color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+  .storyboard-row .sb-thumb {
+    width: 80px; height: 60px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary); font-size: 11px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .storyboard-row .sb-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .storyboard-row .sb-info { flex: 1; min-width: 0; }
+  .storyboard-row .sb-desc { font-size: 13px; margin-bottom: 4px; }
+  .storyboard-row .sb-status {
+    display: flex; gap: 8px; align-items: center;
+  }
+  .sb-badge {
+    font-size: 11px; padding: 2px 6px; border-radius: 3px;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .sb-badge.pending { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
+  .sb-badge.done { background: rgba(62,207,142,0.15); color: var(--success); }
+  .sb-badge.generating { background: rgba(245,166,35,0.15); color: var(--warning); }
+  .storyboard-row .sb-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+  /* ===== Right Panel ===== */
+  .right-panel {
+    width: 400px;
+    min-width: 400px;
+    background: var(--panel-bg);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+  .right-panel .preview-header {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .right-panel .preview-header span { font-size: 13px; font-weight: 600; }
+  .right-panel .preview-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .preview-placeholder {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.8;
+  }
+  .preview-placeholder .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.3; }
+  .preview-placeholder .hint { font-size: 12px; opacity: 0.6; }
+  .right-panel .preview-footer {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 8px;
+  }
+
+  /* ===== Modal ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    width: 480px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    animation: modalIn 0.15s ease-out;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  .modal-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .modal-close {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border: none; background: none; color: var(--text-secondary);
+    font-size: 18px; cursor: pointer; border-radius: var(--radius-sm);
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .modal-body { padding: 16px; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* ===== Form ===== */
+  .form-group { margin-bottom: 12px; }
+  .form-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; display: block; }
+  .form-input, .form-select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    font-family: inherit;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--accent); }
+  .form-textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+    line-height: 1.6;
+  }
+  .form-textarea:focus { border-color: var(--accent); }
+  .form-row { display: flex; gap: 8px; }
+  .form-row > * { flex: 1; }
+
+  /* ===== Toast ===== */
+  .toast-container {
+    position: fixed;
+    top: 56px;
+    right: 16px;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .toast {
+    padding: 10px 16px;
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    animation: slideIn 0.2s ease-out;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  .toast.success { border-color: var(--success); }
+  .toast.error { border-color: var(--danger); }
+
+  /* ===== Misc ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .highlight { color: var(--accent); }
+  .muted { color: var(--text-secondary); font-size: 12px; }
+
+  /* ===== Review Panel ===== */
+  .review-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .review-panel .review-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .review-panel .review-empty {
+    padding: 24px;
+    text-align: center;
+    color: var(--success);
+    font-size: 14px;
+  }
+  .review-group { padding: 8px 16px; }
+  .review-group-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; padding: 4px 0; }
+  .review-group-title.critical { color: var(--danger); }
+  .review-group-title.warning { color: var(--warning); }
+  .review-group-title.suggestion { color: var(--accent); }
+  .review-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    font-size: 13px;
+    border-radius: var(--radius-sm);
+    transition: background 0.15s;
+  }
+  .review-item:hover { background: rgba(255,255,255,0.03); }
+  .review-item .review-text { flex: 1; }
+  .review-item .review-action {
+    padding: 3px 8px;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--accent);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .review-item .review-action:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .review-footer {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+  }
+
+  /* ===== Character Card Design Image ===== */
+  .character-card .char-img {
+    width: 100%;
+    height: 120px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 11px;
+    overflow: hidden;
+    position: relative;
+  }
+  .character-card .char-img img { width: 100%; height: 100%; object-fit: cover; }
+  .character-card .char-img .overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.5);
+    opacity: 0; transition: opacity 0.15s;
+    cursor: pointer;
+  }
+  .character-card .char-img:hover .overlay { opacity: 1; }
+  .char-img-dot {
+    position: absolute; top: 6px; right: 6px;
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .char-img-dot.set { background: var(--success); }
+  .char-img-dot.pending { background: var(--text-secondary); }
+
+  /* ===== Asset Library ===== */
+  .asset-section { margin-bottom: 16px; }
+  .asset-section .asset-section-title {
+    font-size: 12px; font-weight: 600; color: var(--text-secondary);
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .asset-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+  .asset-card {
+    width: 100px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .asset-card:hover { border-color: var(--accent); }
+  .asset-card .asset-thumb {
+    width: 100%; height: 80px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary); font-size: 24px;
+  }
+  .asset-card .asset-label {
+    padding: 4px 6px;
+    font-size: 11px;
+    text-align: center;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border);
+  }
+  .asset-card.add-card { border-style: dashed; }
+  .asset-card.add-card .asset-thumb { font-size: 20px; }
+  .asset-card .asset-status {
+    font-size: 10px; padding: 2px 4px; text-align: center;
+  }
+  .asset-card .asset-status.set { color: var(--success); }
+  .asset-card .asset-status.pending { color: var(--text-secondary); }
+
+  /* ===== Asset Library Tab ===== */
+  .asset-subtab {
+    padding: 8px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+  }
+  .asset-subtab:hover { color: var(--text); }
+  .asset-subtab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .asset-list-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    transition: background 0.15s;
+  }
+  .asset-list-item:hover { background: rgba(255,255,255,0.03); }
+  .asset-list-item.active { background: rgba(91,109,255,0.12); border-left: 2px solid var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ===== Top Toolbar ===== -->
+<div class="toolbar">
+  <span class="app-title">🎬 个人工作台</span>
+  <span class="sep"></span>
+  <button class="btn btn-sm" onclick="openModal('export-modal')">📥 导入</button>
+  <button class="btn btn-sm" onclick="openModal('export-modal')">📤 导出</button>
+  <span class="sep"></span>
+  <button class="btn btn-sm btn-primary" onclick="openModal('compose-modal')">🎞️ 合成导出</button>
+  <span style="flex:1"></span>
+  <button class="btn btn-sm btn-icon" onclick="openModal('settings-modal')" title="全局设置">⚙️</button>
+</div>
+
+<!-- ===== Main Layout ===== -->
+<div class="main-layout">
+
+  <!-- ===== Left Panel: Project List ===== -->
+  <div class="left-panel">
+    <div class="panel-header">
+      <input class="search-box" placeholder="🔍 搜索项目..." />
+    </div>
+    <div class="project-list">
+      <div class="project-item active" onclick="this.parentElement.querySelectorAll('.project-item').forEach(e=>e.classList.remove('active'));this.classList.add('active')">
+        <div class="name">🏮 长安十二时辰</div>
+        <div class="meta"><span>12 场</span><span>·</span><span class="status-dot done"></span> 全部完成</div>
+      </div>
+      <div class="project-item" onclick="this.parentElement.querySelectorAll('.project-item').forEach(e=>e.classList.remove('active'));this.classList.add('active')">
+        <div class="name">🌊 深海回声</div>
+        <div class="meta"><span>8 场</span><span>·</span><span class="status-dot active"></span> 生图中</div>
+      </div>
+      <div class="project-item" onclick="this.parentElement.querySelectorAll('.project-item').forEach(e=>e.classList.remove('active'));this.classList.add('active')">
+        <div class="name">⚔️ 剑与玫瑰</div>
+        <div class="meta"><span>5 场</span><span>·</span>仅大纲</div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button class="btn btn-primary" style="width:100%" onclick="openModal('project-modal')">+ 新建项目</button>
+    </div>
+  </div>
+
+  <!-- ===== Middle Panel: Editor ===== -->
+  <div class="middle-panel">
+    <div class="tab-bar">
+      <div class="tab active" data-tab="outline" onclick="switchTab('outline')">📝 剧情大纲</div>
+      <div class="tab" data-tab="script" onclick="switchTab('script')">📜 剧本</div>
+      <div class="tab" data-tab="storyboard" onclick="switchTab('storyboard')">🎞️ 分镜</div>
+      <div class="tab" data-tab="assetlib" onclick="switchTab('assetlib')">🎨 资产库</div>
+    </div>
+    <div class="content-area" id="content-area">
+
+      <!-- ===== Tab: 剧情大纲 ===== -->
+      <div class="tab-content" id="tab-outline">
+        <!-- 审查结果面板 -->
+        <div class="review-panel" id="review-panel">
+          <div class="review-header">
+            📋 大纲审查结果
+            <button class="btn btn-sm" onclick="runReview()">🔄 重新审查</button>
+          </div>
+          <div class="review-group">
+            <div class="review-group-title critical">🔴 必须处理（2 条）</div>
+            <div class="review-item">
+              <span class="review-text">大纲中提到 <strong>「曹破延」</strong> 但未添加该人物的小传</span>
+              <button class="review-action" onclick="openModal('character-modal');showToast('success','已预填姓名：曹破延')">+ 添加</button>
+            </div>
+            <div class="review-item">
+              <span class="review-text">大纲中提到 <strong>「右相林九郎」</strong> 但未添加该人物的小传</span>
+              <button class="review-action" onclick="openModal('character-modal');showToast('success','已预填姓名：林九郎')">+ 添加</button>
+            </div>
+          </div>
+          <div class="review-group">
+            <div class="review-group-title warning">🟡 建议完善（1 条）</div>
+            <div class="review-item">
+              <span class="review-text"><strong>「张小敬」</strong>的背景故事较简略，建议补充其早年经历</span>
+              <button class="review-action" style="color:var(--warning); border-color:var(--warning);">定位</button>
+            </div>
+          </div>
+          <div class="review-group">
+            <div class="review-group-title suggestion">🔵 优化提示（1 条）</div>
+            <div class="review-item">
+              <span class="review-text">第3幕「花灯大会」场景可考虑增加群众角色的氛围描写</span>
+              <button class="review-action" style="color:var(--accent);">查看</button>
+            </div>
+          </div>
+          <div class="review-footer">
+            <button class="btn btn-sm btn-primary" onclick="showToast('success','已批量添加 2 个缺失人物，请补充详细小传')">一键添加缺失人物（2）</button>
+            <button class="btn btn-sm" onclick="showToast('success','将直接使用当前大纲生成剧本')">忽略，直接生成剧本</button>
+          </div>
+        </div>
+
+        <div class="editor-section">
+          <div class="section-title">剧情大纲</div>
+          <textarea class="editor-textarea" placeholder="在此编写你的剧情大纲...&#10;&#10;示例：&#10;天宝三载，上元节前夕，长安城内暗流涌动。一场精心策划的阴谋即将在花灯璀璨之夜揭开帷幕。前长安不良帅张小敬临危受命，必须在十二个时辰内揪出幕后黑手，拯救这座万国来朝的都城。&#10;&#10;故事采用多线叙事结构，主线为张小敬追查突厥狼卫，支线包括李必的政治博弈、檀棋的身份挣扎、以及隐藏在长安城中的各方势力角逐。">天宝三载，上元节前夕，长安城内暗流涌动。一场精心策划的阴谋即将在花灯璀璨之夜揭开帷幕。
+
+前长安不良帅张小敬临危受命，必须在十二个时辰内揪出幕后黑手。他的第一个线索指向西域商贾曹破延——此人疑似与潜入长安的突厥狼卫有染。
+
+与此同时，靖安司司丞李必在沙盘前运筹帷幄，侍女檀棋奉命暗中协助张小敬。然而朝堂之上，右相林九郎的势力也在暗中布局，试图借这场危机扳倒李必。
+
+主线为张小敬追查突厥狼卫，支线包括李必的政治博弈、檀棋的身份挣扎，以及隐藏在长安城中的各方势力角逐。最终一切指向即将到来的上元节花灯大会——那是袭击的最佳时机，也是张小敬最后的翻盘机会。</textarea>
+        </div>
+        <div class="editor-section">
+          <div class="section-title">人物小传</div>
+          <div class="character-list">
+            <div class="character-card">
+              <div class="char-name">张小敬</div>
+              <div class="char-info">男 · 35岁 · 前不良帅</div>
+              <div class="char-tags">
+                <span class="tag">沉稳果决</span>
+                <span class="tag">重情重义</span>
+                <span class="tag">武艺高强</span>
+              </div>
+            </div>
+            <div class="character-card">
+              <div class="char-name">檀棋</div>
+              <div class="char-info">女 · 28岁 · 李必侍女</div>
+              <div class="char-tags">
+                <span class="tag">聪慧机敏</span>
+                <span class="tag">隐忍坚韧</span>
+                <span class="tag">容貌秀丽</span>
+              </div>
+            </div>
+            <div class="character-card">
+              <div class="char-name">李必</div>
+              <div class="char-info">男 · 22岁 · 靖安司司丞</div>
+              <div class="char-tags">
+                <span class="tag">少年老成</span>
+                <span class="tag">心怀天下</span>
+                <span class="tag">棋艺精湛</span>
+              </div>
+            </div>
+            <div class="character-card add-card" onclick="openModal('character-modal')">+ 添加人物</div>
+          </div>
+        </div>
+        <div style="text-align:right; padding-top: 12px; display:flex; gap:8px; justify-content:flex-end;">
+          <button class="btn" onclick="runReview()">🔍 审查大纲</button>
+          <button class="btn btn-primary" onclick="showToast('success','剧本生成成功！已拆分为 12 场')">🤖 生成剧本</button>
+        </div>
+      </div>
+
+      <!-- ===== Tab: 剧本 ===== -->
+      <div class="tab-content" id="tab-script" style="display:none">
+        <div class="script-scene">
+          <div class="scene-header">
+            <span class="scene-num">第 1 场</span>
+            <span class="scene-location">长安西市 · 日 · 外</span>
+            <span style="flex:1"></span>
+            <button class="btn btn-sm">✏️ 编辑</button>
+          </div>
+          <div class="scene-desc">上元节前夕，长安西市人头攒动。各国商贾沿街叫卖，胡旋舞姬在街角旋转，烟火气中透着节日的喧嚣。张小敬挤过人群，目光如鹰隼般扫过每一个角落。他在追查一个线索——一个关于突厥狼卫的线索。</div>
+          <div style="font-size:12px; color: var(--text-secondary); margin: 8px 0;">出场人物：张小敬、曹破延、路人若干</div>
+          <div class="dialogue-item">
+            <div class="dialogue-char">张小敬</div>
+            <div class="dialogue-text">这长安城的花灯，照得亮街巷，却照不透人心。</div>
+          </div>
+          <div class="dialogue-item">
+            <div class="dialogue-char">曹破延</div>
+            <div class="dialogue-text">张帅爷，您要找的人，往怀远坊去了。</div>
+          </div>
+        </div>
+        <div class="script-scene">
+          <div class="scene-header">
+            <span class="scene-num">第 2 场</span>
+            <span class="scene-location">靖安司内 · 日 · 内</span>
+            <span style="flex:1"></span>
+            <button class="btn btn-sm">✏️ 编辑</button>
+          </div>
+          <div class="scene-desc">靖安司大殿中，巨大的沙盘上长安城的地形一览无余。李必站在沙盘前，一手执白子，一手负后。一旁的沙漏正缓缓落下细沙——十二个时辰的倒计时已经开始。</div>
+          <div style="font-size:12px; color: var(--text-secondary); margin: 8px 0;">出场人物：李必、檀棋</div>
+          <div class="dialogue-item">
+            <div class="dialogue-char">李必</div>
+            <div class="dialogue-text">传令下去，全城戒严。此人不足为惧，真正可怕的是——他背后的人。</div>
+          </div>
+          <div class="dialogue-item">
+            <div class="dialogue-char">檀棋</div>
+            <div class="dialogue-text">公子，您的意思是……</div>
+          </div>
+        </div>
+        <div class="script-scene" style="opacity:0.4; text-align:center; padding:24px;">
+          第 3 ~ 12 场（Demo 省略）
+        </div>
+      </div>
+
+      <!-- ===== Tab: 分镜 ===== -->
+      <div class="tab-content" id="tab-storyboard" style="display:none">
+        <div style="display:flex; gap:8px; margin-bottom:16px;">
+          <button class="btn btn-sm" onclick="switchTab('assetlib');switchAssetTab('storyimg')">🖼️ 前往资产库生图</button>
+          <button class="btn btn-sm" onclick="openModal('video-modal')">🎥 批量生成视频</button>
+          <button class="btn btn-sm" onclick="openModal('tts-modal')">🔊 批量配音</button>
+        </div>
+        <div class="storyboard-grid">
+          <!-- Storyboard 1 -->
+          <div class="storyboard-row">
+            <div class="sb-num">1</div>
+            <div class="sb-thumb"><img src="" alt="预览" onerror="this.parentElement.innerHTML='<span>🖼️</span>'" /></div>
+            <div class="sb-info">
+              <div class="sb-desc">长安西市全景，人群熙攘，花灯高悬</div>
+              <div style="font-size:10px; color:var(--text-secondary); margin-bottom:2px;">📎 引用资产：张小敬设定图 · 长安西市场景图</div>
+              <div class="sb-status">
+                <span class="sb-badge done">🖼️ 已生图</span>
+                <span class="sb-badge done">🎥 已生成视频</span>
+                <span class="sb-badge done">🔊 已配音</span>
+              </div>
+            </div>
+            <div class="sb-actions">
+              <button class="btn btn-sm" onclick="switchTab('assetlib');switchAssetTab('storyimg')" title="前往资产库生图">🖼️</button>
+              <button class="btn btn-sm" onclick="openModal('video-modal')">🎥</button>
+              <button class="btn btn-sm" onclick="openModal('tts-modal')">🔊</button>
+            </div>
+          </div>
+          <!-- Storyboard 2 -->
+          <div class="storyboard-row">
+            <div class="sb-num">2</div>
+            <div class="sb-thumb"><img src="" alt="预览" onerror="this.parentElement.innerHTML='<span>🖼️</span>'" /></div>
+            <div class="sb-info">
+              <div class="sb-desc">张小敬特写，目光犀利，人群中警觉搜寻</div>
+              <div style="font-size:10px; color:var(--text-secondary); margin-bottom:2px;">📎 引用资产：张小敬设定图</div>
+              <div class="sb-status">
+                <span class="sb-badge done">🖼️ 已生图</span>
+                <span class="sb-badge generating">🎥 生成中...</span>
+                <span class="sb-badge pending">🔊 待配音</span>
+              </div>
+            </div>
+            <div class="sb-actions">
+              <button class="btn btn-sm" onclick="switchTab('assetlib');switchAssetTab('storyimg')" title="前往资产库生图">🖼️</button>
+              <button class="btn btn-sm" onclick="openModal('video-modal')">🎥</button>
+              <button class="btn btn-sm" onclick="openModal('tts-modal')">🔊</button>
+            </div>
+          </div>
+          <!-- Storyboard 3 -->
+          <div class="storyboard-row">
+            <div class="sb-num">3</div>
+            <div class="sb-thumb"><span>🖼️</span></div>
+            <div class="sb-info">
+              <div class="sb-desc">靖安司沙盘前，李必沉思对弈</div>
+              <div class="sb-status">
+                <span class="sb-badge pending">🖼️ 待生图</span>
+                <span class="sb-badge pending">🎥 待生成</span>
+                <span class="sb-badge pending">🔊 待配音</span>
+              </div>
+            </div>
+            <div class="sb-actions">
+              <button class="btn btn-sm" onclick="switchTab('assetlib');switchAssetTab('storyimg')" title="前往资产库生图">🖼️</button>
+              <button class="btn btn-sm" onclick="openModal('video-modal')">🎥</button>
+              <button class="btn btn-sm" onclick="openModal('tts-modal')">🔊</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Tab: 资产库 ===== -->
+      <div class="tab-content" id="tab-assetlib" style="display:none">
+        <!-- 子 Tab -->
+        <div style="display:flex; border-bottom:1px solid var(--border); margin-bottom:16px;">
+          <div class="asset-subtab active" data-astab="char" onclick="switchAssetTab('char')">👤 人物设定</div>
+          <div class="asset-subtab" data-astab="scene" onclick="switchAssetTab('scene')">🏙️ 场景设定</div>
+          <div class="asset-subtab" data-astab="item" onclick="switchAssetTab('item')">📦 物品设计</div>
+          <div class="asset-subtab" data-astab="storyimg" onclick="switchAssetTab('storyimg')">🎞️ 分镜生图</div>
+        </div>
+
+        <!-- 搜索/筛选栏 -->
+        <div style="display:flex; gap:8px; margin-bottom:16px;">
+          <input class="form-input" placeholder="🔍 搜索资产..." style="flex:1" />
+          <select class="form-select" style="width:140px"><option>全部状态</option><option>已就绪</option><option>待生成</option></select>
+          <button class="btn btn-sm btn-primary">+ 添加资产</button>
+        </div>
+
+        <!-- 资产内容区：左侧列表 + 右侧预览生成 -->
+        <div style="display:flex; gap:16px; height: calc(100% - 80px);">
+          <!-- 左侧资产列表 -->
+          <div style="width:220px; flex-shrink:0; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius);">
+
+            <!-- 人物设定子tab -->
+            <div class="asset-sub-content" id="astab-char">
+              <div class="asset-list-item active" onclick="selectAsset(this)">
+                <span>👤</span> 张小敬 <span style="margin-left:auto; font-size:10px; color:var(--success);">✓</span>
+              </div>
+              <div class="asset-list-item" onclick="selectAsset(this)">
+                <span>👤</span> 檀棋 <span style="margin-left:auto; font-size:10px; color:var(--success);">✓</span>
+              </div>
+              <div class="asset-list-item" onclick="selectAsset(this)">
+                <span>👤</span> 李必 <span style="margin-left:auto; font-size:10px; color:var(--text-secondary);">○</span>
+              </div>
+              <div class="asset-list-item" onclick="selectAsset(this)">
+                <span>👤</span> 曹破延 <span style="margin-left:auto; font-size:10px; color:var(--text-secondary);">○</span>
+              </div>
+              <div class="asset-list-item" onclick="selectAsset(this)">
+                <span>👤</span> 林九郎 <span style="margin-left:auto; font-size:10px; color:var(--text-secondary);">○</span>
+              </div>
+            </div>
+
+            <!-- 场景设定子tab -->
+            <div class="asset-sub-content" id="astab-scene" style="display:none;">
+              <div class="asset-list-item active" onclick="selectAsset(this)">
+                <span>🏙️</span> 长安西市 <span style="margin-left:auto; font-size:10px; color:var(--success);">✓</span>
+              </div>
+              <div class="asset-list-item" onclick="selectAsset(this)">
+                <span>🏙️</span> 靖安司大殿 <span style="margin-left:auto; font-size:10px; color:var(--text-secondary);">○</span>
+              </div>
+              <div class="asset-list-item" onclick="selectAsset(this)">
+                <span>🏙️</span> 花灯大会 <span style="margin-left:auto; font-size:10px; color:var(--text-secondary);">○</span>
+              </div>
+            </div>
+
+            <!-- 物品设计子tab -->
+            <div class="asset-sub-content" id="astab-item" style="display:none;">
+              <div class="asset-list-item active" onclick="selectAsset(this)">
+                <span>📦</span> 狼卫令牌 <span style="margin-left:auto; font-size:10px; color:var(--success);">✓</span>
+              </div>
+              <div class="asset-list-item" onclick="selectAsset(this)">
+                <span>📦</span> 沙盘地图 <span style="margin-left:auto; font-size:10px; color:var(--success);">✓</span>
+              </div>
+              <div class="asset-list-item" onclick="selectAsset(this)">
+                <span>📦</span> 弩箭 <span style="margin-left:auto; font-size:10px; color:var(--text-secondary);">○</span>
+              </div>
+            </div>
+
+            <!-- 分镜生图子tab -->
+            <div class="asset-sub-content" id="astab-storyimg" style="display:none;">
+              <div style="padding: 8px; border-bottom:1px solid var(--border);">
+                <select class="form-select" style="width:100%; font-size:12px;"><option>长安十二时辰</option><option>深海回声</option></select>
+              </div>
+              <div class="asset-list-item active" onclick="selectAsset(this)">
+                <span>🎞️</span> 分镜 1 — 西市全景 <span style="margin-left:auto; font-size:10px; color:var(--success);">✓</span>
+              </div>
+              <div class="asset-list-item" onclick="selectAsset(this)">
+                <span>🎞️</span> 分镜 2 — 张小敬特写 <span style="margin-left:auto; font-size:10px; color:var(--warning);">⏳</span>
+              </div>
+              <div class="asset-list-item" onclick="selectAsset(this)">
+                <span>🎞️</span> 分镜 3 — 靖安司沙盘 <span style="margin-left:auto; font-size:10px; color:var(--text-secondary);">○</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右侧预览/生成区 -->
+          <div style="flex:1; border:1px solid var(--border); border-radius:var(--radius); padding:16px; display:flex; flex-direction:column;">
+            <div style="flex:1; display:flex; align-items:center; justify-content:center; background:var(--bg); border-radius:var(--radius-sm); margin-bottom:12px; min-height:200px;">
+              <div class="preview-placeholder">
+                <div class="icon">🖼️</div>
+                <div>选择左侧资产<br>预览或生成设定图</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">资产名称 <span style="font-size:10px; color:var(--text-secondary);">（可编辑）</span></label>
+              <input class="form-input" value="张小敬" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">提示词</label>
+              <textarea class="form-textarea" style="min-height:60px;">角色「张小敬」全身站立设定图，男性，35岁，面容坚毅，短须，束发，身穿暗红色不良帅制服，腰间佩刀，身材健硕，正面视角，概念艺术风格，精细服饰细节，纯色背景，高分辨率</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">📎 引用资产（分镜生图时自动匹配）</label>
+              <div style="font-size:11px; color:var(--text-secondary);">当前无引用 · 在分镜生图子 Tab 中自动匹配</div>
+            </div>
+            <div style="display:flex; gap:8px; justify-content:flex-end;">
+              <button class="btn" onclick="showToast('success','提示词已重置')">🔄 重置提示词</button>
+              <button class="btn btn-primary" onclick="showToast('success','设定图生成任务已提交')">🖼️ 生成设定图</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Bottom bar: project actions -->
+    <div style="padding:8px 16px; border-top:1px solid var(--border); display:flex; gap:8px; background: var(--panel-bg);">
+      <span class="muted" style="align-self:center;">项目操作：</span>
+      <button class="btn btn-sm" onclick="openModal('project-modal')">✏️ 重命名</button>
+      <button class="btn btn-sm btn-danger" onclick="openModal('delete-modal')">🗑️ 删除项目</button>
+    </div>
+  </div>
+
+  <!-- ===== Right Panel: Preview ===== -->
+  <div class="right-panel">
+    <div class="preview-header">
+      <span>👁️ 预览区</span>
+      <span class="muted">选中分镜以预览</span>
+    </div>
+    <div class="preview-area">
+      <div class="preview-placeholder">
+        <div class="icon">📺</div>
+        <div>选择左侧分镜<br>在此预览生成结果</div>
+        <div class="hint" style="margin-top:8px;">支持图片 / 视频 / 音频</div>
+      </div>
+    </div>
+    <div class="preview-footer">
+      <button class="btn btn-sm" style="flex:1">⏮️ 上一分镜</button>
+      <button class="btn btn-sm" style="flex:1">▶️ 播放</button>
+      <button class="btn btn-sm" style="flex:1">⏭️ 下一分镜</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Modals ===== -->
+
+<!-- 新建/编辑项目 -->
+<div class="modal-overlay" id="project-modal">
+  <div class="modal">
+    <div class="modal-header">
+      新建项目
+      <button class="modal-close" onclick="closeModal('project-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">项目名称</label>
+        <input class="form-input" placeholder="输入项目名称..." value="" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('project-modal')">取消</button>
+      <button class="btn btn-primary" onclick="closeModal('project-modal');showToast('success','项目创建成功')">确认创建</button>
+    </div>
+  </div>
+</div>
+
+<!-- 人物编辑 -->
+<div class="modal-overlay" id="character-modal">
+  <div class="modal">
+    <div class="modal-header">
+      添加人物
+      <button class="modal-close" onclick="closeModal('character-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">姓名 *</label><input class="form-input" placeholder="角色姓名" /></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">性别</label>
+          <select class="form-select"><option>男</option><option>女</option><option>其他</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">年龄</label><input class="form-input" placeholder="年龄" /></div>
+      </div>
+      <div class="form-group"><label class="form-label">性格描述</label><textarea class="form-textarea" placeholder="描述角色的性格特征..."></textarea></div>
+      <div class="form-group"><label class="form-label">背景故事</label><textarea class="form-textarea" placeholder="角色的身世和过往经历..."></textarea></div>
+      <div class="form-group"><label class="form-label">外观特征</label><input class="form-input" placeholder="身高、体型、发型、着装风格等..." /></div>
+      <div class="form-group"><label class="form-label">绑定音色</label>
+        <select class="form-select"><option>默认音色</option><option>低沉男声</option><option>清澈女声</option><option>少年音</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('character-modal')">取消</button>
+      <button class="btn btn-primary" onclick="closeModal('character-modal');showToast('success','人物已添加')">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- 生图设置 -->
+<div class="modal-overlay" id="image-modal">
+  <div class="modal">
+    <div class="modal-header">
+      生成图片 —— 分镜 1
+      <button class="modal-close" onclick="closeModal('image-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">正向提示词</label>
+        <textarea class="form-textarea" style="min-height:100px">大唐长安西市，上元节前夕，繁华街景，花灯高悬于街道两侧，人群熙熙攘攘，各国商贾云集，暖黄色调，电影级光影，8K超精细，中国古风，历史写实风格</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">负向提示词</label>
+        <input class="form-input" placeholder="负面提示词（选填）" value="模糊，变形，低质量，水印" />
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">宽度</label><input class="form-input" value="1920" /></div>
+        <div class="form-group"><label class="form-label">高度</label><input class="form-input" value="1080" /></div>
+        <div class="form-group"><label class="form-label">风格</label>
+          <select class="form-select"><option>写实</option><option>动漫</option><option>水墨</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('image-modal')">取消</button>
+      <button class="btn btn-primary" onclick="closeModal('image-modal');showToast('success','图片生成中...')">生成</button>
+    </div>
+  </div>
+</div>
+
+<!-- 视频生成设置 -->
+<div class="modal-overlay" id="video-modal">
+  <div class="modal">
+    <div class="modal-header">
+      生成视频 —— 分镜 1
+      <button class="modal-close" onclick="closeModal('video-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">参考图片</label>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px; text-align:center; color: var(--text-secondary); font-size:13px;">
+          🖼️ 已关联分镜 1 的生成图片
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">运动提示词</label>
+        <textarea class="form-textarea" style="min-height:80px">镜头缓慢向前推进，街道上的人群自然走动，花灯在微风中轻轻摇晃，光线柔和变化，暖黄色灯笼光影流转</textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">时长（秒）</label><input class="form-input" value="5" /></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('video-modal')">取消</button>
+      <button class="btn btn-primary" onclick="closeModal('video-modal');showToast('success','视频生成任务已提交')">生成</button>
+    </div>
+  </div>
+</div>
+
+<!-- 配音设置 -->
+<div class="modal-overlay" id="tts-modal">
+  <div class="modal">
+    <div class="modal-header">
+      生成配音 —— 分镜 1（张小敬）
+      <button class="modal-close" onclick="closeModal('tts-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">对白文本</label>
+        <textarea class="form-textarea" style="min-height:60px">这长安城的花灯，照得亮街巷，却照不透人心。</textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">角色</label><input class="form-input" value="张小敬" disabled /></div>
+        <div class="form-group"><label class="form-label">音色</label>
+          <select class="form-select"><option>深沉男声</option><option>沉稳中年</option><option>粗犷硬汉</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('tts-modal')">取消</button>
+      <button class="btn btn-primary" onclick="closeModal('tts-modal');showToast('success','配音生成中...')">生成</button>
+    </div>
+  </div>
+</div>
+
+<!-- 合成导出 -->
+<div class="modal-overlay" id="compose-modal">
+  <div class="modal">
+    <div class="modal-header">
+      合成导出 MP4
+      <button class="modal-close" onclick="closeModal('compose-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">输出分辨率</label>
+          <select class="form-select"><option>1920×1080 (1080p)</option><option>1280×720 (720p)</option><option>3840×2160 (4K)</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">帧率</label>
+          <select class="form-select"><option>24 fps</option><option>30 fps</option><option>60 fps</option></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">输出路径</label>
+        <div style="display:flex; gap:8px;">
+          <input class="form-input" value="C:\Users\Documents\Output\长安十二时辰.mp4" style="flex:1" />
+          <button class="btn btn-sm">📁 选择</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">添加字幕</label>
+          <select class="form-select"><option>是</option><option>否</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">字幕字体大小</label>
+          <select class="form-select"><option>中 (默认)</option><option>小</option><option>大</option></select>
+        </div>
+      </div>
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px; font-size:13px; color:var(--text-secondary);">
+        📋 合成清单：<br>
+        ✅ 分镜 1/12：图片 ✓ | 视频 ✓ | 配音 ✓<br>
+        ⏳ 分镜 2/12：图片 ✓ | 视频 生成中 | 配音 —<br>
+        ⬜ 分镜 3~12：待完成
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('compose-modal')">取消</button>
+      <button class="btn btn-success" onclick="closeModal('compose-modal');showToast('success','合成完成！MP4 已导出')">开始合成</button>
+    </div>
+  </div>
+</div>
+
+<!-- 导入导出 -->
+<div class="modal-overlay" id="export-modal">
+  <div class="modal">
+    <div class="modal-header">
+      导入 / 导出数据
+      <button class="modal-close" onclick="closeModal('export-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; gap:12px; justify-content:center; padding:24px 0;">
+        <div style="flex:1; text-align:center; padding:24px; border:1px dashed var(--border); border-radius:var(--radius); cursor:pointer; transition:border-color 0.15s" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'">
+          <div style="font-size:32px; margin-bottom:8px;">📥</div>
+          <div style="font-size:14px; font-weight:600;">导入 JSON</div>
+          <div class="muted" style="margin-top:4px;">从备份文件恢复所有项目数据</div>
+        </div>
+        <div style="flex:1; text-align:center; padding:24px; border:1px dashed var(--border); border-radius:var(--radius); cursor:pointer; transition:border-color 0.15s" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'">
+          <div style="font-size:32px; margin-bottom:8px;">📤</div>
+          <div style="font-size:14px; font-weight:600;">导出 JSON</div>
+          <div class="muted" style="margin-top:4px;">将所有项目数据打包导出为 JSON 文件</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('export-modal')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 全局设置 -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal" style="width:560px">
+    <div class="modal-header">
+      全局设置
+      <button class="modal-close" onclick="closeModal('settings-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- LLM 设置 -->
+      <div style="font-weight:600; font-size:13px; margin-bottom:8px; color:var(--accent);">🤖 剧本生成模型 (LLM)</div>
+      <div class="form-group"><label class="form-label">API Base URL</label><input class="form-input" value="https://api.openai.com/v1" /></div>
+      <div class="form-group"><label class="form-label">API Key</label><input class="form-input" type="password" value="sk-●●●●●●●●●●●●●●●●●●●●" /></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">模型名称</label><input class="form-input" value="gpt-4o" /></div>
+        <div class="form-group"><label class="form-label">最大 Token</label><input class="form-input" value="4096" /></div>
+      </div>
+      <hr style="border-color:var(--border); margin: 16px 0;" />
+      <!-- 生图设置 -->
+      <div style="font-weight:600; font-size:13px; margin-bottom:8px; color:var(--accent);">🖼️ 生图模型</div>
+      <div class="form-group"><label class="form-label">API Base URL</label><input class="form-input" value="https://api.stability.ai/v1" /></div>
+      <div class="form-group"><label class="form-label">API Key</label><input class="form-input" type="password" value="sk-●●●●●●●●●●●●●●●●●●●●" /></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">接口模板</label><select class="form-select"><option>Stable Diffusion WebUI</option><option>OpenAI DALL·E</option><option>自定义</option></select></div>
+        <div class="form-group"><label class="form-label">默认尺寸</label><input class="form-input" value="1920×1080" /></div>
+      </div>
+      <hr style="border-color:var(--border); margin: 16px 0;" />
+      <!-- 视频模型设置 -->
+      <div style="font-weight:600; font-size:13px; margin-bottom:8px; color:var(--accent);">🎥 视频生成模型</div>
+      <div class="form-group"><label class="form-label">API Base URL</label><input class="form-input" value="https://api.runwayml.com/v1" /></div>
+      <div class="form-group"><label class="form-label">API Key</label><input class="form-input" type="password" value="sk-●●●●●●●●●●●●●●●●●●●●" /></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">接口模板</label><select class="form-select"><option>Runway Gen-3</option><option>Pika</option><option>自定义</option></select></div>
+        <div class="form-group"><label class="form-label">默认时长（秒）</label><input class="form-input" value="5" /></div>
+      </div>
+      <hr style="border-color:var(--border); margin: 16px 0;" />
+      <!-- 语音模型设置 -->
+      <div style="font-weight:600; font-size:13px; margin-bottom:8px; color:var(--accent);">🔊 语音模型 (TTS)</div>
+      <div class="form-group"><label class="form-label">API Base URL</label><input class="form-input" value="https://api.openai.com/v1" /></div>
+      <div class="form-group"><label class="form-label">API Key</label><input class="form-input" type="password" value="sk-●●●●●●●●●●●●●●●●●●●●" /></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">接口模板</label><select class="form-select"><option>OpenAI TTS</option><option>Edge TTS</option><option>自定义</option></select></div>
+        <div class="form-group"><label class="form-label">默认音色</label><select class="form-select"><option>alloy</option><option>echo</option><option>onyx</option></select></div>
+      </div>
+      <hr style="border-color:var(--border); margin: 16px 0;" />
+      <!-- 通用设置 -->
+      <div style="font-weight:600; font-size:13px; margin-bottom:8px; color:var(--accent);">⚙️ 通用</div>
+      <div class="form-group"><label class="form-label">FFmpeg 路径</label><input class="form-input" placeholder="留空使用内置 FFmpeg" /></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('settings-modal')">取消</button>
+      <button class="btn btn-primary" onclick="closeModal('settings-modal');showToast('success','设置已保存')">保存设置</button>
+    </div>
+  </div>
+</div>
+
+<!-- 删除确认 -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal" style="width:380px">
+    <div class="modal-header">
+      确认删除
+      <button class="modal-close" onclick="closeModal('delete-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px; line-height:1.6;">确定要删除项目 <strong style="color:var(--danger);">长安十二时辰</strong> 吗？</p>
+      <p class="muted" style="margin-top:8px;">此操作将删除该项目下的所有数据（图片、视频、音频文件），不可恢复。</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('delete-modal')">取消</button>
+      <button class="btn btn-danger" onclick="closeModal('delete-modal');showToast('error','项目已删除')">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast 容器 -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+  // Tab 切换
+  function switchTab(tabName) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+    document.getElementById('tab-' + tabName).style.display = 'block';
+  }
+
+  // Modal 操作
+  function openModal(id) {
+    document.getElementById(id).classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === this) closeModal(this.id);
+    });
+  });
+
+  // Toast
+  function showToast(type, message) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast ' + type;
+    const icons = { success: '✅', error: '❌', warning: '⚠️' };
+    toast.innerHTML = `<span>${icons[type] || ''}</span> ${message}`;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 2500);
+  }
+
+  // 审查大纲
+  function runReview() {
+    const panel = document.getElementById('review-panel');
+    // 模拟审查中状态
+    panel.querySelector('.review-header').innerHTML = '📋 大纲审查结果 <span class="muted">⏳ 审查中...</span>';
+    panel.querySelector('.review-header').querySelector('span').style.color = 'var(--warning)';
+    setTimeout(() => {
+      // 恢复审查结果
+      panel.querySelector('.review-header').innerHTML = '📋 大纲审查结果 <button class="btn btn-sm" onclick="runReview()">🔄 重新审查</button>';
+      showToast('success', '审查完成！发现 2 个必须处理项、1 个建议完善项');
+    }, 1200);
+  }
+
+  // 资产库子Tab切换
+  function switchAssetTab(tabName) {
+    document.querySelectorAll('.asset-subtab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`[data-astab="${tabName}"]`).classList.add('active');
+    document.querySelectorAll('.asset-sub-content').forEach(c => c.style.display = 'none');
+    const target = document.getElementById('astab-' + tabName);
+    if (target) target.style.display = 'block';
+  }
+  // 资产列表选中
+  function selectAsset(el) {
+    el.parentElement.querySelectorAll('.asset-list-item').forEach(e => e.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // 键盘 ESC 关闭弹窗
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.show').forEach(m => closeModal(m.id));
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+import type { Settings, VoiceAsset } from '../../shared/types';
+
+export async function generateTTS(
+  settings: Settings,
+  text: string,
+  voice: VoiceAsset
+): Promise<ArrayBuffer> {
+  const { baseUrl, apiKey, template } = settings.tts;
+
+  if (template === 'openai-tts') {
+    const url = baseUrl.replace(/\/+$/, '') + '/audio/speech';
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: 'tts-1',
+        input: text,
+        voice: voice.voiceId,
+        speed: voice.parameters.speed,
+      }),
+    });
+    if (!resp.ok) throw new Error(`TTS API error ${resp.status}`);
+    return resp.arrayBuffer();
+  }
+
+  if (template === 'edge-tts') {
+    // Edge TTS — use Microsoft Edge TTS API
+    const pitchStr = voice.parameters.pitch > 0 ? `+${voice.parameters.pitch}Hz` : `${voice.parameters.pitch}Hz`;
+    const rateStr = `${(voice.parameters.speed - 1) * 100}%`;
+    const ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="zh-CN">
+      <voice name="${voice.voiceId}">
+        <prosody rate="${rateStr}" pitch="${pitchStr}">${text}</prosody>
+      </voice>
+    </speak>`;
+    const url = `https://speech.microsoft.com/edge/tts/v1`;
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/ssml+xml', 'X-Microsoft-OutputFormat': 'audio-16khz-128kbitrate-mono-mp3' },
+      body: ssml,
+    });
+    if (!resp.ok) throw new Error(`Edge TTS error ${resp.status}`);
+    return resp.arrayBuffer();
+  }
+
+  // custom
+  const url = baseUrl.replace(/\/+$/, '') + '/tts';
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({ text, voice: voice.voiceId, speed: voice.parameters.speed, pitch: voice.parameters.pitch }),
+  });
+  if (!resp.ok) throw new Error(`TTS API error ${resp.status}`);
+  return resp.arrayBuffer();
+}
