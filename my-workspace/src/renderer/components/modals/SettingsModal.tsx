@@ -20,7 +20,20 @@ export function SettingsModal({ settings, onSave, onClose }: Props) {
           <button onClick={onClose} style={{ border: 'none', background: 'transparent', color: 'var(--text-dim)', cursor: 'pointer', fontSize: 16 }}>✕</button>
         </div>
         <div className="modal-body">
-          <h4 style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 8 }}>LLM（大语言模型）</h4>
+          <h4 style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 8 }}>🤖 LLM（大语言模型）</h4>
+          <div className="form-group">
+            <label>模板</label>
+            <select value={form.llm.template} onChange={(e) => {
+              const t = e.target.value;
+              if (t === 'openai') setForm({ ...form, llm: { ...form.llm, template: t, baseUrl: 'https://api.openai.com/v1', model: 'gpt-4o' } });
+              else if (t === 'deepseek') setForm({ ...form, llm: { ...form.llm, template: t, baseUrl: 'https://api.deepseek.com', model: 'deepseek-chat' } });
+              else setForm({ ...form, llm: { ...form.llm, template: t } });
+            }}>
+              <option value="openai">OpenAI</option>
+              <option value="deepseek">DeepSeek</option>
+              <option value="custom">自定义</option>
+            </select>
+          </div>
           <div className="form-row">
             <div className="form-group"><label>Base URL</label><input value={form.llm.baseUrl} onChange={(e) => setForm({ ...form, llm: { ...form.llm, baseUrl: e.target.value } })} /></div>
             <div className="form-group"><label>API Key</label><input type="password" value={form.llm.apiKey} onChange={(e) => setForm({ ...form, llm: { ...form.llm, apiKey: e.target.value } })} /></div>
@@ -69,7 +82,7 @@ export function SettingsModal({ settings, onSave, onClose }: Props) {
             <div className="form-group">
               <label>模板</label>
               <select value={form.tts.template} onChange={(e) => setForm({ ...form, tts: { ...form.tts, template: e.target.value } })}>
-                <option value="openai-tts">OpenAI TTS</option><option value="edge-tts">Edge TTS</option><option value="jimeng">即梦 / 火山方舟</option><option value="custom">自定义</option>
+                <option value="openai-tts">OpenAI TTS</option><option value="edge-tts">Edge TTS</option><option value="minimax">MiniMax</option><option value="jimeng">即梦 / 火山方舟</option><option value="custom">自定义</option>
               </select>
             </div>
             <div className="form-group">
@@ -104,7 +117,7 @@ export function SettingsModal({ settings, onSave, onClose }: Props) {
 
 function getDefaultSettings(): Settings {
   return {
-    llm: { baseUrl: 'https://api.openai.com', apiKey: '', model: 'gpt-4o', maxTokens: 4096 },
+    llm: { baseUrl: 'https://api.openai.com/v1', apiKey: '', model: 'gpt-4o', maxTokens: 4096, template: 'openai' },
     imageModel: { baseUrl: '', apiKey: '', defaultSize: '1024x1024', template: 'stable-diffusion', customHeaders: {} },
     videoModel: { baseUrl: '', apiKey: '', defaultDuration: 5, template: 'runway', customHeaders: {} },
     tts: { baseUrl: '', apiKey: '', defaultVoice: 'alloy', template: 'openai-tts', customHeaders: {} },

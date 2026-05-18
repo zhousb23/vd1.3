@@ -39,6 +39,25 @@ export async function generateTTS(
     return resp.arrayBuffer();
   }
 
+  if (template === 'minimax') {
+    const url = baseUrl.replace(/\/+$/, '') + '/v1/t2a_v2';
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: 'speech-2.8-hd',
+        text,
+        voice_setting: {
+          voice_id: voice.voiceId,
+          speed: voice.parameters.speed,
+          vol: 1.0,
+        },
+      }),
+    });
+    if (!resp.ok) throw new Error(`MiniMax TTS error ${resp.status}: ${await resp.text()}`);
+    return resp.arrayBuffer();
+  }
+
   if (template === 'edge-tts') {
     // Edge TTS — use Microsoft Edge TTS API
     const pitchStr = voice.parameters.pitch > 0 ? `+${voice.parameters.pitch}Hz` : `${voice.parameters.pitch}Hz`;

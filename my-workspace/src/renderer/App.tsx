@@ -87,7 +87,7 @@ export default function App() {
       setProjects([demo]);
       setActiveProject(demo.id);
       setSettings({
-        llm: { baseUrl: 'https://api.openai.com', apiKey: '', model: 'gpt-4o', maxTokens: 4096 },
+        llm: { baseUrl: 'https://api.openai.com/v1', apiKey: '', model: 'gpt-4o', maxTokens: 4096, template: 'openai' },
         imageModel: { baseUrl: '', apiKey: '', defaultSize: '1024x1024', template: 'stable-diffusion', customHeaders: {} },
         videoModel: { baseUrl: '', apiKey: '', defaultDuration: 5, template: 'runway', customHeaders: {} },
         tts: { baseUrl: '', apiKey: '', defaultVoice: 'alloy', template: 'openai-tts', customHeaders: {} },
