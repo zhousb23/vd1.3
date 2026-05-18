@@ -120,7 +120,7 @@ function AssetDetail({ subtype, data, name, done }: { subtype: string; data: unk
     if (!window.api) return;
     const assetTypeMap: Record<string, string> = { character: '人物设定', scene: '场景设定', item: '物品设计', style: '风格参考' };
     const atype = assetTypeMap[subtype] ?? '人物设定';
-    const path = await window.api.asset.importImage(atype, name);
+    const path = await window.api?.asset?.importImage?.(atype, name) ?? null;
     if (path) alert(`图片已导入：${path}`);
   };
 

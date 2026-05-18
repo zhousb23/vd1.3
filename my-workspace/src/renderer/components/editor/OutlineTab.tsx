@@ -19,7 +19,7 @@ export function OutlineTab() {
   const saveOutline = useCallback(
     debounce((text: string) => {
       if (!activeProjectId) return;
-      window.api.project.update(activeProjectId, { outline: text });
+      try { window.api?.project?.update?.(activeProjectId, { outline: text }); } catch {}
     }, 500),
     [activeProjectId]
   );
@@ -67,10 +67,10 @@ export function OutlineTab() {
       };
       const newStore = { ...assetStore, characters: [...assetStore.characters, newAsset] };
       setAssetStore(newStore);
-      await window.api.asset.save(newStore);
+      try { await window.api?.asset?.save?.(newStore); } catch {}
     }
 
-    await window.api.project.update(activeProjectId, { characters: chars });
+    try { await window.api?.project?.update?.(activeProjectId, { characters: chars }); } catch {}
     updateProject(activeProjectId, { characters: chars });
     setShowCharModal(false);
     setEditingChar(null);
@@ -79,7 +79,7 @@ export function OutlineTab() {
   const handleDeleteChar = async (charId: string) => {
     if (!activeProjectId || !project) return;
     const chars = project.characters.filter((c) => c.id !== charId);
-    await window.api.project.update(activeProjectId, { characters: chars });
+    try { await window.api?.project?.update?.(activeProjectId, { characters: chars }); } catch {}
     updateProject(activeProjectId, { characters: chars });
   };
 
@@ -102,7 +102,7 @@ export function OutlineTab() {
       voiceId: null,
     }));
     const chars = [...project.characters, ...newChars];
-    await window.api.project.update(activeProjectId, { characters: chars });
+    try { await window.api?.project?.update?.(activeProjectId, { characters: chars }); } catch {}
     updateProject(activeProjectId, { characters: chars });
   };
 

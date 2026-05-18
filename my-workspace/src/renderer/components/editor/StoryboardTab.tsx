@@ -25,7 +25,7 @@ export function StoryboardTab() {
         status: { image: 'pending', video: 'pending', audio: 'pending' },
       });
     }
-    await window.api.project.update(activeProjectId, { storyboards: sbs });
+    try { await window.api?.project?.update?.(activeProjectId, { storyboards: sbs }); } catch {}
     updateProject(activeProjectId, { storyboards: sbs });
     if (sbs.length > 0) setSelectedSb(sbs[0]);
   };

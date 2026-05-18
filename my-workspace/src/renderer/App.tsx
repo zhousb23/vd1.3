@@ -87,10 +87,10 @@ export default function App() {
       setProjects([demo]);
       setActiveProject(demo.id);
       setSettings({
-        llm: { baseUrl: 'https://api.openai.com/v1', apiKey: '', model: 'gpt-4o', maxTokens: 4096, template: 'openai' },
-        imageModel: { baseUrl: '', apiKey: '', defaultSize: '1024x1024', template: 'stable-diffusion', customHeaders: {} },
-        videoModel: { baseUrl: '', apiKey: '', defaultDuration: 5, template: 'runway', customHeaders: {} },
-        tts: { baseUrl: '', apiKey: '', defaultVoice: 'alloy', template: 'openai-tts', customHeaders: {} },
+        llm: { baseUrl: '/api/deepseek', apiKey: 'sk-8bc20190aa7e449095ac20c2a30cecc5', model: 'deepseek-chat', maxTokens: 65536, template: 'deepseek' },
+        imageModel: { baseUrl: '/api/ark', apiKey: 'ark-d2ff1a2e-819b-439c-b670-c07b25b76f1c-06da4', defaultSize: '1024x1024', template: 'jimeng', customHeaders: {} },
+        videoModel: { baseUrl: '/api/ark', apiKey: 'ark-8cc00dfe-5089-4b61-a9e3-3bea86bbd2e0-ae803', defaultDuration: 5, template: 'jimeng', customHeaders: {} },
+        tts: { baseUrl: '/api/tts', apiKey: 'S2uKza3ol-0aOpg6SI-_twHDLoqQElqU', appId: '4619934823', defaultVoice: 'zh_female_qingxin', template: 'jimeng', customHeaders: {} },
         storyboardEngine: 'v1.0',
         ffmpegPath: null,
         exportPath: '',

@@ -265,7 +265,7 @@ export interface Settings {
   llm: { baseUrl: string; apiKey: string; model: string; maxTokens: number; template: string };
   imageModel: { baseUrl: string; apiKey: string; defaultSize: string; template: string; customHeaders: Record<string, string> };
   videoModel: { baseUrl: string; apiKey: string; defaultDuration: number; template: string; customHeaders: Record<string, string> };
-  tts: { baseUrl: string; apiKey: string; defaultVoice: string; template: string; customHeaders: Record<string, string> };
+  tts: { baseUrl: string; apiKey: string; appId?: string; defaultVoice: string; template: string; customHeaders: Record<string, string> };
   storyboardEngine: 'v1.0' | 'v1.2';
   ffmpegPath: string | null;
   exportPath: string;

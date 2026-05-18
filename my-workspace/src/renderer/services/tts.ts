@@ -24,17 +24,31 @@ export async function generateTTS(
   }
 
   if (template === 'jimeng') {
-    const url = baseUrl.replace(/\/+$/, '') + '/audio/speech';
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: 'doubao-tts',
-        input: text,
-        voice: voice.voiceId,
-        speed: voice.parameters.speed,
-      }),
+    const url = baseUrl.replace(/\/+$/, '') + '/api/v1/tts';
+    const appId = (settings.tts as Record<string,string>).appId || '';
+    const body = JSON.stringify({
+      app: { appid: appId, cluster: 'volcano_tts' },
+      user: { uid: appId },
+      audio: { voice_type: voice.voiceId, format: 'mp3', speech_rate: Math.round((voice.parameters.speed - 1) * 100) },
+      request: { reqid: crypto.randomUUID(), operation: 'submit', text },
     });
+
+    // 方式1: X-Api 头鉴权
+    let resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Api-App-Id': appId, 'X-Api-Access-Key': apiKey },
+      body,
+    });
+
+    if (!resp.ok) {
+      // 方式2: Bearer; 格式
+      resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer;${apiKey}` },
+        body,
+      });
+    }
+
     if (!resp.ok) throw new Error(`即梦 TTS error ${resp.status}: ${await resp.text()}`);
     return resp.arrayBuffer();
   }

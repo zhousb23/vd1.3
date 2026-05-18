@@ -24,7 +24,7 @@ export function ProjectSidebar() {
 
     if (hasAPI) {
       try {
-        const created = await window.api.project.create(newName.trim());
+        const created = await window.api?.project?.create?.(newName.trim()) ?? { id: crypto.randomUUID(), name: newName.trim(), outline: '', characters: [], script: null, storyboards: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
         addProject(created);
         setActiveProject(created.id);
       } catch {

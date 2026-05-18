@@ -15,4 +15,23 @@ export default defineConfig({
     outDir: path.resolve(__dirname, 'dist/renderer'),
     emptyOutDir: true,
   },
+  server: {
+    proxy: {
+      '/api/deepseek': {
+        target: 'https://api.deepseek.com',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/deepseek/, ''),
+      },
+      '/api/ark': {
+        target: 'https://ark.cn-beijing.volces.com/api/v3',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/ark/, ''),
+      },
+      '/api/tts': {
+        target: 'https://openspeech.bytedance.com',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/tts/, ''),
+      },
+    },
+  },
 });

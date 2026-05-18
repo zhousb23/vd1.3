@@ -20,7 +20,6 @@ async function chatCompletions(settings: Settings, messages: LLMMessage[]): Prom
       messages,
       max_tokens: maxTokens,
       temperature: 0.8,
-      response_format: { type: 'json_object' },
     }),
   });
 

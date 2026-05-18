@@ -19,7 +19,7 @@ export function ScriptTab() {
     setError(null);
     try {
       const result = await generateScript(settings, project.outline, project.characters);
-      await window.api.project.update(activeProjectId, { script: result });
+      try { await window.api?.project?.update?.(activeProjectId, { script: result }); } catch {}
       updateProject(activeProjectId, { script: result });
     } catch (e) {
       setError(String(e));
@@ -31,7 +31,7 @@ export function ScriptTab() {
   const handleDeleteScene = async (sceneId: string) => {
     if (!activeProjectId || !script) return;
     const updated = { ...script, scenes: script.scenes.filter((s) => s.id !== sceneId) };
-    await window.api.project.update(activeProjectId, { script: updated });
+    try { await window.api?.project?.update?.(activeProjectId, { script: updated }); } catch {}
     updateProject(activeProjectId, { script: updated });
   };
 
