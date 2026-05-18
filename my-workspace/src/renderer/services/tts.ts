@@ -25,7 +25,7 @@ export async function generateTTS(
 
   if (template === 'jimeng') {
     const url = baseUrl.replace(/\/+$/, '') + '/api/v1/tts';
-    const appId = (settings.tts as Record<string,string>).appId || '';
+    const appId = settings.tts.appId || '';
     const body = JSON.stringify({
       app: { appid: appId, cluster: 'volcano_tts' },
       user: { uid: appId },
