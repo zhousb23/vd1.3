@@ -23,6 +23,22 @@ export async function generateTTS(
     return resp.arrayBuffer();
   }
 
+  if (template === 'jimeng') {
+    const url = baseUrl.replace(/\/+$/, '') + '/audio/speech';
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: 'doubao-tts',
+        input: text,
+        voice: voice.voiceId,
+        speed: voice.parameters.speed,
+      }),
+    });
+    if (!resp.ok) throw new Error(`即梦 TTS error ${resp.status}: ${await resp.text()}`);
+    return resp.arrayBuffer();
+  }
+
   if (template === 'edge-tts') {
     // Edge TTS — use Microsoft Edge TTS API
     const pitchStr = voice.parameters.pitch > 0 ? `+${voice.parameters.pitch}Hz` : `${voice.parameters.pitch}Hz`;

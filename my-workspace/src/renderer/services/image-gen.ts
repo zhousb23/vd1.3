@@ -18,6 +18,8 @@ export async function generateImage(
     return generateSD(baseUrl, prompt, width, height, params?.negativePrompt, params?.referenceImageBase64);
   } else if (template === 'dalle') {
     return generateDalle(baseUrl, apiKey, prompt, `${width}x${height}`);
+  } else if (template === 'jimeng') {
+    return generateJimeng(baseUrl, apiKey, prompt, width, height);
   } else {
     // custom — pass prompt directly
     return generateCustom(baseUrl, apiKey, prompt, width, height);
@@ -60,6 +62,25 @@ async function generateDalle(baseUrl: string, apiKey: string, prompt: string, si
     body: JSON.stringify({ model: 'dall-e-3', prompt, n: 1, size, response_format: 'b64_json' }),
   });
   if (!resp.ok) throw new Error(`DALL·E API error ${resp.status}`);
+  const data = await resp.json();
+  const imgB64 = data.data?.[0]?.b64_json ?? '';
+  return { imageBase64: imgB64, format: 'png' };
+}
+
+async function generateJimeng(baseUrl: string, apiKey: string, prompt: string, width: number, height: number): Promise<ImageGenResult> {
+  const url = baseUrl.replace(/\/+$/, '') + '/images/generations';
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      model: 'doubao-seedream-4-0-250828',
+      prompt,
+      size: `${width}x${height}`,
+      response_format: 'b64_json',
+      watermark: false,
+    }),
+  });
+  if (!resp.ok) throw new Error(`即梦 API error ${resp.status}: ${await resp.text()}`);
   const data = await resp.json();
   const imgB64 = data.data?.[0]?.b64_json ?? '';
   return { imageBase64: imgB64, format: 'png' };
