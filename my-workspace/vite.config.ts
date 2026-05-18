@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import electron from 'vite-plugin-electron';
-import electronRenderer from 'vite-plugin-electron-renderer';
 import path from 'path';
 
 export default defineConfig({
@@ -13,6 +12,7 @@ export default defineConfig({
         vite: {
           build: {
             outDir: 'dist/main',
+            emptyOutDir: false,
             rollupOptions: {
               external: ['electron', 'fluent-ffmpeg', 'keytar'],
             },
@@ -21,22 +21,20 @@ export default defineConfig({
       },
       {
         entry: 'src/preload/index.ts',
-        onstart(args) {
-          args.reload();
-        },
+        onstart(args) { args.reload(); },
         vite: {
-          build: {
-            outDir: 'dist/preload',
-          },
+          build: { outDir: 'dist/preload', emptyOutDir: false },
         },
       },
     ]),
-    electronRenderer(),
   ],
   resolve: {
     alias: {
       '@shared': path.resolve(__dirname, 'src/shared'),
       '@renderer': path.resolve(__dirname, 'src/renderer'),
     },
+  },
+  build: {
+    emptyOutDir: false,
   },
 });

@@ -1,6 +1,14 @@
 node_modules/
 dist/
 dist-electron/
+release/
+*.exe
+*.dll
+*.pak
+*.bin
+*.dat
+*.asar
+*.blockmap
 .vite/
 *.log
 .DS_Store

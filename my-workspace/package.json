@@ -5,7 +5,7 @@
   "main": "dist/main/index.js",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc --noEmit && vite build && vite build --config vite.renderer.config.ts",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "dist": "electron-builder"
