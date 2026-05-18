@@ -139,17 +139,34 @@ function SettingsModal({ onClose, toast }) {
     <div className="modal-overlay" onClick={onClose}><div className="modal wide" onClick={e=>e.stopPropagation()}>
       <div className="modal-header">⚙ 全局设置<button onClick={onClose} style={{border:'none',background:'transparent',color:'var(--text-dim)',cursor:'pointer',fontSize:16}}>✕</button></div>
       <div className="modal-body">
-        <h4>LLM（大语言模型）</h4>
-        <div className="form-row"><div className="form-group"><label>Base URL</label><input defaultValue="https://api.openai.com"/></div><div className="form-group"><label>API Key</label><input type="password" defaultValue="sk-xxxxxxxx"/></div></div>
+        <h4>🤖 LLM（大语言模型）</h4>
+        <div className="form-group"><label>模板</label><select><option>OpenAI</option><option>DeepSeek</option><option>自定义</option></select></div>
+        <div className="form-row"><div className="form-group"><label>Base URL</label><input defaultValue="https://api.openai.com/v1"/></div><div className="form-group"><label>API Key</label><input type="password" defaultValue="sk-xxxxxxxx"/></div></div>
         <div className="form-row"><div className="form-group"><label>模型名称</label><input defaultValue="gpt-4o"/></div><div className="form-group"><label>最大 Token</label><input defaultValue="4096"/></div></div>
-        <hr/><h4>生图 / 视频 / 语音</h4>
+        <hr/><h4>🖼️ 生图模型</h4>
         <div className="form-row">
-          <div className="form-group"><label>生图模板</label><select><option>Stable Diffusion WebUI</option><option>DALL·E</option><option>自定义</option></select></div>
-          <div className="form-group"><label>视频模板</label><select><option>Runway Gen-3</option><option>Pika</option><option>Kling</option><option>自定义</option></select></div>
-          <div className="form-group"><label>语音模板</label><select><option>OpenAI TTS</option><option>Edge TTS</option><option>自定义</option></select></div>
+          <div className="form-group"><label>Base URL</label><input defaultValue="http://127.0.0.1:7860"/></div>
+          <div className="form-group"><label>API Key</label><input type="password"/></div>
+          <div className="form-group"><label>模板</label><select><option>Stable Diffusion WebUI</option><option>DALL·E</option><option>即梦 / 火山方舟</option><option>自定义</option></select></div>
         </div>
-        <hr/><h4>分镜引擎 <span className="evo-badge v12">V1.2+</span></h4>
+        <hr/><h4>🎥 视频生成模型</h4>
+        <div className="form-group"><label>Base URL</label><input defaultValue="https://api.runwayml.com/v1"/></div>
+        <div className="form-group"><label>API Key</label><input type="password"/></div>
+        <div className="form-row">
+          <div className="form-group"><label>模板</label><select><option>Runway Gen-3</option><option>Pika</option><option>Kling</option><option>即梦 / 火山方舟</option><option>自定义</option></select></div>
+          <div className="form-group"><label>默认时长（秒）</label><input defaultValue="5"/></div>
+        </div>
+        <hr/><h4>🔊 语音模型 (TTS)</h4>
+        <div className="form-group"><label>Base URL</label><input defaultValue="https://api.openai.com"/></div>
+        <div className="form-group"><label>API Key</label><input type="password"/></div>
+        <div className="form-row">
+          <div className="form-group"><label>模板</label><select><option>OpenAI TTS</option><option>Edge TTS</option><option>MiniMax</option><option>即梦 / 火山方舟</option><option>自定义</option></select></div>
+          <div className="form-group"><label>默认音色</label><select><option>alloy</option><option>echo</option><option>onyx</option></select></div>
+        </div>
+        <hr/><h4>🎞️ 分镜引擎 <span className="evo-badge v12">V1.2+</span></h4>
         <div className="form-group"><label>引擎版本</label><select><option>V1.0 — 简化模式（单一提示词）</option><option>V1.2 — 锚定模式（三类提示词 + 时间轴）</option></select></div>
+        <hr/><h4>⚙️ 通用</h4>
+        <div className="form-group"><label>FFmpeg 路径</label><input placeholder="留空使用内置 FFmpeg"/></div>
       </div>
       <div className="modal-footer"><button className="btn" onClick={onClose}>取消</button><button className="btn primary" onClick={()=>{toast('设置已保存');onClose();}}>保存设置</button></div>
     </div></div>
